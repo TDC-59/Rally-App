@@ -35,6 +35,9 @@
   "triggers": { "crons": ["*/5 * * * *", "*/15 * * * *", "0 4 * * *"] },
 
   "vars": {
+    // "resend" in production (needs the RESEND_API_KEY secret). "log" prints mail to the console (.dev.vars).
+    "MAIL_DRIVER": "resend",
+    "MAIL_FROM": "Rally <onboarding@resend.dev>",
     // THROWAWAY iOS push gate. Set to "0" (or remove with src/routes/spike.ts) after step 7.
     "SPIKE_ENABLED": "1",
     // Public half of the VAPID key pair (base64url, uncompressed P-256 point).

@@ -1,0 +1,153 @@
+/* Rally layer (--r-*). Operator console, auth, marketing, the finder map.
+   Tokens are copied from CLAUDE.md. Every color is first defined on bare :root. */
+
+@font-face { font-family: "Archivo Black"; src: url(/fonts/archivo-black-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url(/fonts/archivo-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url(/fonts/archivo-latin-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url(/fonts/archivo-latin-700-normal.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url(/fonts/ibm-plex-mono-latin-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url(/fonts/ibm-plex-mono-latin-500-normal.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+
+:root {
+  --r-ground: #FFFFFF;  --r-surface: #FAF8F7;  --r-surface-2: #F1EDEB;
+  --r-line: #E3DCD8;    --r-line-hard: #19120F;
+  --r-ink: #19120F;     --r-ink-2: #574C47;    --r-ink-3: #8B7E78;
+
+  --r-ember: #FF4D1C;   --r-ember-ink: #FFFFFF;
+  --r-signal: #FFD400;  --r-signal-ink: #19120F;
+  --r-teal: #00806F;
+
+  --r-ok: #0E7A52;      --r-warn: #8A5200;     --r-crit: #BE123C;
+  --r-ok-bg: #E4F4EC;   --r-warn-bg: #FBF0DC;  --r-crit-bg: #FCE7EC;
+  --r-teal-bg: #DEF2EF;
+
+  --f-display: "Archivo Black", "Arial Black", system-ui, sans-serif;
+  --f-body: "Archivo", system-ui, -apple-system, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px;
+  --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+  --radius: 2px; --pill: 999px;
+  --sticker: 3px 3px 0 var(--r-line-hard);
+  --sticker-sm: 2px 2px 0 var(--r-line-hard);
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --r-ground: #0A0A0A; --r-surface: #151211; --r-surface-2: #211C19;
+    --r-line: #332B27;   --r-line-hard: #FAF7F6;
+    --r-ink: #FAF7F6;    --r-ink-2: #B6AAA5;   --r-ink-3: #80746F;
+    --r-ember: #FF6236;  --r-ember-ink: #1A0A04;
+    --r-teal: #2BD9C0;
+    --r-ok: #35C98A;     --r-warn: #F0A42A;    --r-crit: #FF5F7A;
+    --r-ok-bg: #0F2A1F;  --r-warn-bg: #2B1E08;  --r-crit-bg: #2E0F16; --r-teal-bg: #0B2925;
+  }
+}
+:root[data-theme="dark"] {
+  --r-ground: #0A0A0A; --r-surface: #151211; --r-surface-2: #211C19;
+  --r-line: #332B27;   --r-line-hard: #FAF7F6;
+  --r-ink: #FAF7F6;    --r-ink-2: #B6AAA5;   --r-ink-3: #80746F;
+  --r-ember: #FF6236;  --r-ember-ink: #1A0A04;
+  --r-teal: #2BD9C0;
+  --r-ok: #35C98A;     --r-warn: #F0A42A;    --r-crit: #FF5F7A;
+  --r-ok-bg: #0F2A1F;  --r-warn-bg: #2B1E08;  --r-crit-bg: #2E0F16; --r-teal-bg: #0B2925;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--r-ground); color: var(--r-ink);
+  font: 400 16px/1.5 var(--f-body);
+}
+
+/* ---- layout: flex/grid with gap, never per-element margins ---- */
+.page { display: grid; gap: var(--s6); padding: var(--s5) max(var(--s4), env(safe-area-inset-left)) var(--s7); max-width: 960px; margin-inline: auto; }
+.narrow { max-width: 440px; }
+.stack { display: grid; gap: var(--s4); }
+.stack-sm { display: grid; gap: var(--s2); }
+.row { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; }
+.spread { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; justify-content: space-between; }
+h1, h2, h3, p, ul, ol, dl, dd, figure, fieldset { margin: 0; }
+ul.plain { list-style: none; padding: 0; display: grid; gap: var(--s2); }
+
+/* ---- chrome ---- */
+.topbar { display: flex; gap: var(--s4); align-items: center; justify-content: space-between; flex-wrap: wrap;
+  padding: var(--s3) max(var(--s4), env(safe-area-inset-left)); border-bottom: 2px solid var(--r-line-hard); background: var(--r-ground); }
+.wordmark { font: 400 22px/1 var(--f-display); text-transform: uppercase; letter-spacing: -0.02em; color: var(--r-ink); text-decoration: none; }
+.nav { display: flex; gap: var(--s4); flex-wrap: wrap; align-items: center; }
+.nav a { color: var(--r-ink); text-decoration: none; font-weight: 600; padding-block: var(--s1); border-bottom: 3px solid transparent; }
+.nav a[aria-current="page"] { border-bottom-color: var(--r-ember); }
+
+/* ---- type ---- */
+.display { font: 400 clamp(32px, 7vw, 56px)/0.95 var(--f-display); text-transform: uppercase; letter-spacing: -0.03em; }
+h1 { font: 400 clamp(28px, 5vw, 40px)/1 var(--f-display); text-transform: uppercase; letter-spacing: -0.02em; }
+h2 { font: 400 20px/1.1 var(--f-display); text-transform: uppercase; letter-spacing: -0.01em; }
+.muted { color: var(--r-ink-2); }
+.data, .num { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+/* Ember on white text is 3.3:1, so links are ink with an ember underline. */
+a { color: var(--r-ink); text-decoration-color: var(--r-ember); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+/* ---- boxes ---- */
+.card { background: var(--r-ground); border: 2px solid var(--r-line-hard); border-radius: var(--radius); box-shadow: var(--sticker); padding: var(--s4); display: grid; gap: var(--s3); }
+.panel { background: var(--r-surface); border: 2px solid var(--r-line); border-radius: var(--radius); padding: var(--s4); display: grid; gap: var(--s3); }
+
+/* ---- forms ---- */
+form { display: grid; gap: var(--s4); }
+label { display: grid; gap: var(--s1); font-weight: 600; }
+.hint { font-weight: 400; color: var(--r-ink-2); font-size: 14px; }
+input[type=text], input[type=email], input[type=number], input[type=date], input[type=time], select, textarea {
+  font: 400 16px/1.3 var(--f-body); color: var(--r-ink); background: var(--r-ground);
+  border: 2px solid var(--r-line-hard); border-radius: var(--radius); padding: 12px; width: 100%; min-height: 48px;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--r-ember); outline-offset: 2px;
+}
+
+/* ---- buttons: press into the page ----
+   White on ember is 3.32:1, which passes only as WCAG "large text",
+   so button labels are 19px bold (≥ 18.66px bold). Don't shrink them. */
+.btn, button {
+  font: 700 19px/1 var(--f-body); display: inline-flex; gap: var(--s2); align-items: center; justify-content: center;
+  min-height: 48px; padding: 12px 20px; border: 2px solid var(--r-line-hard); border-radius: var(--radius);
+  background: var(--r-ember); color: var(--r-ember-ink); box-shadow: var(--sticker); cursor: pointer; text-decoration: none;
+  transition: transform 60ms ease-out, box-shadow 60ms ease-out;
+}
+.btn:active, button:active { transform: translate(3px, 3px); box-shadow: none; }
+.btn.secondary, button.secondary { background: var(--r-ground); color: var(--r-ink); }
+.btn.quiet, button.quiet { background: transparent; color: var(--r-ink); box-shadow: none; border-color: transparent; text-decoration: underline; text-decoration-color: var(--r-ember); text-decoration-thickness: 2px; text-underline-offset: 3px; padding-inline: 0; font-size: 16px; font-weight: 600; min-height: 44px; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ---- status: pill + shape + word, never color alone ---- */
+.pill { display: inline-flex; gap: 6px; align-items: center; border-radius: var(--pill); padding: 3px 10px 3px 8px; border: 2px solid var(--r-line-hard);
+  font: 600 13px/1.2 var(--f-body); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.pill::before { content: ""; width: 9px; height: 9px; background: currentColor; flex: none; }
+.pill.live { background: var(--r-signal); color: var(--r-signal-ink); border-color: var(--r-signal-ink); }
+.pill.live::before { border-radius: 50%; }                                        /* dot */
+.pill.ok { background: var(--r-ok-bg); color: var(--r-ok); }                      /* square */
+.pill.warn { background: var(--r-warn-bg); color: var(--r-warn); }
+.pill.warn::before { width: 0; height: 0; background: none; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 9px solid currentColor; } /* triangle */
+.pill.crit { background: var(--r-crit-bg); color: var(--r-crit); }
+.pill.crit::before { transform: rotate(45deg); width: 8px; height: 8px; }          /* diamond */
+.pill.info { background: var(--r-teal-bg); color: var(--r-teal); }
+.pill.neutral { background: var(--r-surface-2); color: var(--r-ink); }
+
+/* ---- notices ---- */
+.notice { border: 2px solid currentColor; border-radius: var(--radius); padding: var(--s3) var(--s4); display: grid; gap: var(--s1); }
+.notice.crit { color: var(--r-crit); background: var(--r-crit-bg); }
+.notice.ok { color: var(--r-ok); background: var(--r-ok-bg); }
+.notice.warn { color: var(--r-warn); background: var(--r-warn-bg); }
+.notice > * { color: var(--r-ink); }
+.notice strong { color: inherit; }
+
+/* ---- tables ---- */
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: var(--s2) var(--s3); border-bottom: 2px solid var(--r-line); vertical-align: top; }
+th { font: 600 13px/1.2 var(--f-body); text-transform: uppercase; letter-spacing: 0.04em; color: var(--r-ink-2); }
+td.num, th.num { text-align: right; }
+.table-wrap { overflow-x: auto; }
+
+/* ---- member list ---- */
+.member { display: flex; gap: var(--s3); flex-wrap: wrap; align-items: center; justify-content: space-between; padding-block: var(--s3); border-bottom: 2px solid var(--r-line); }
+.member .who { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }

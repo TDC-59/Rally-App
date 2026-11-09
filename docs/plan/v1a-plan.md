@@ -16,6 +16,7 @@ Deviations found while building (2026-11-09):
 - `.npmrc` sets `legacy-peer-deps=true` to get past an npm 10 bug with vitest 4's optional peers.
 - Brand pages are canonical at `/{slug}/`, with a trailing slash. A page must sit inside its service worker's scope, and a scope of `/{slug}` without the slash would also cover `/{slug}bros`.
 - The VAPID subject is the Rally https origin, not a personal email address.
+- **Step 1 gate passed 2026-11-09:** push from the Worker reached a real iPhone as a Home Screen app.
 - The RFC 8291 Appendix A vector couldn't be fetched from this sandbox. Encryption is tested by round-trip through an independently written user-agent decryptor. The real-device test is the acceptance check.
 
 This plan reconciles two sources that disagree: the build prompt and the standing rules (`README.md`, which is really `CLAUDE.md`). Where they conflict, this plan follows the standing rules, because the prompt says not to deviate from them — and calls out every conflict.
@@ -462,3 +463,16 @@ Recommendation: path per brand on a real domain for v1a. Never let a real custom
 - **Google OAuth in "Testing" status issues refresh tokens that die after 7 days.** The reconcile cron would fail silently after a week. Set the OAuth app's publishing status to production (unverified is OK under 100 users).
 - **KV is eventually consistent (up to ~60s across locations).** "Open" state is read from D1, not KV. Otherwise a customer who taps the push lands on a page that says the truck isn't open yet. KV only caches the slow-changing brand profile and theme.
 - **Durable Objects:** nothing in v1a needs atomic per-shift state. None until v2 pre-ordering.
+
+---
+
+## Step 3 notes (auth)
+
+- **Magic link:** GET `/auth/{token}` shows a "Sign in" button and never consumes the token. POST consumes it. Corporate mail scanners open links before people do, and a GET that consumed the token would sign the scanner in and leave the operator with a dead link.
+- **Sessions:** the cookie `__Host-rally_s` (HttpOnly, Secure, SameSite=Lax, 30 days, sliding) holds 256 random bits. The table holds their SHA-256. It isn't "signed": a random id checked against the database has nothing to forge, and sign-out actually revokes it.
+- **CSRF:** cross-origin form POSTs are refused (Hono `csrf`), on top of SameSite=Lax.
+- **Rate limits:** 5 links per email per hour (D1, exact), 20 sign-in requests per IP per hour (KV, approximate). The response is identical either way, so it can't be used to probe which addresses exist.
+- **Onboarding:** brand, first truck, and Owner membership are created in one D1 batch. The timezone is pre-selected from `request.cf.timezone`.
+- **Team:** an owner adds crew or owners by email, which sends a sign-in link. A brand can never lose its last owner.
+- **Email:** sent through a `Mailer` interface (Resend in production, log locally, memory in tests). `MAIL_FROM` is `onboarding@resend.dev` until a domain is verified. That sender delivers only to the Resend account's own address.
+- **Contrast:** white-on-ember button labels are 19px bold, which counts as WCAG "large text" (3:1), because white on ember is 3.32:1. Links are ink with an ember underline. CLAUDE.md doesn't define dark values for the `--r-*-bg` tints, so they were added.
