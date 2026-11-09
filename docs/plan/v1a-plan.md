@@ -1,6 +1,13 @@
 # Rally v1a — Build Plan (draft for review)
 
-Status: **awaiting approval.** Nothing below is built. Decisions marked **DECIDE** need an answer before the step that depends on them.
+Status: **approved 2026-11-09.**
+
+Decisions:
+1. Standing rules win over the build prompt; scope is v1a only.
+2. `README.md` renamed to `CLAUDE.md`; `CONTEXT.md` and ADRs 0001–0004 drafted.
+3. Editing a published shift notifies no one. Push kinds are today + open (standing rules); T-60 is out unless reinstated.
+4. A real production domain is required before the first customer follows. `workers.dev` is for building and the iOS spike only. **Domain still to be named.**
+5. No travel buffer between back-to-back shifts.
 
 This plan reconciles two sources that disagree: the build prompt and the standing rules (`README.md`, which is really `CLAUDE.md`). Where they conflict, this plan follows the standing rules, because the prompt says not to deviate from them — and calls out every conflict.
 
