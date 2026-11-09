@@ -9,6 +9,15 @@ Decisions:
 4. A real production domain is required before the first customer follows. `workers.dev` is for building and the iOS spike only. **Domain still to be named.**
 5. No travel buffer between back-to-back shifts.
 
+Deviations found while building (2026-11-09):
+- `@cloudflare/vitest-pool-workers` is deprecated and renamed `@cloudflare/vitest-plugin`. Using the new name.
+- Static files are bundled into the Worker as modules (`static/` + `src/static.ts`), not Workers static assets. The asset-upload step authenticates with a short-lived upload token that this cloud sandbox's credential proxy overwrites. Bundling also removes a second deploy artifact.
+- `migrations/` is authoritative. SQLite requires table CHECKs after all columns, so `shifts` is laid out differently from the sketch in §2. The constraints are the same.
+- `.npmrc` sets `legacy-peer-deps=true` to get past an npm 10 bug with vitest 4's optional peers.
+- Brand pages are canonical at `/{slug}/`, with a trailing slash. A page must sit inside its service worker's scope, and a scope of `/{slug}` without the slash would also cover `/{slug}bros`.
+- The VAPID subject is the Rally https origin, not a personal email address.
+- The RFC 8291 Appendix A vector couldn't be fetched from this sandbox. Encryption is tested by round-trip through an independently written user-agent decryptor. The real-device test is the acceptance check.
+
 This plan reconciles two sources that disagree: the build prompt and the standing rules (`README.md`, which is really `CLAUDE.md`). Where they conflict, this plan follows the standing rules, because the prompt says not to deviate from them — and calls out every conflict.
 
 ---
@@ -78,7 +87,7 @@ CREATE TABLE brands (
   display_font  TEXT NOT NULL DEFAULT 'archivo-black',  -- key into a curated, self-hosted list
   radius_px     INTEGER NOT NULL DEFAULT 2 CHECK (radius_px BETWEEN 0 AND 24),
   on_finder_map INTEGER NOT NULL DEFAULT 1 CHECK (on_finder_map IN (0,1)),
-  public_at     INTEGER,                -- set on first public page view of a published shift
+  public_at     INTEGER,                -- set when the brand first publishes a shift; slug is frozen after
   created_at    INTEGER NOT NULL,
   CHECK (accent_hex GLOB '#[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]'),
   CHECK (ground_hex GLOB '#[0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]'),

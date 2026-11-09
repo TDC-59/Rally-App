@@ -1,0 +1,45 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rally",
+  "main": "src/index.ts",
+  "account_id": "4d04a4ae9096bce3dc1dcb0d8af43bec",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+
+  // Static files live in static/ and are bundled into the Worker as modules (see src/static.ts).
+  // Binary files import as ArrayBuffer, client CSS/JS as text. No separate asset upload to fail.
+  "rules": [
+    { "type": "Data", "globs": ["**/*.png", "**/*.woff2", "**/*.svg"], "fallthrough": false },
+    { "type": "Text", "globs": ["**/*.css", "**/*.client.js"], "fallthrough": false }
+  ],
+
+  "d1_databases": [
+    { "binding": "DB", "database_name": "rally", "database_id": "695f0e2a-8577-40c0-b283-a3903d49b752", "migrations_dir": "migrations" }
+  ],
+  // Slow-changing brand profile/theme only. Live state is read from D1: KV can lag ~60s.
+  "kv_namespaces": [
+    { "binding": "CACHE", "id": "b6d1182ba2c945d08ad10bed43b28f77" }
+  ],
+  "queues": {
+    "producers": [{ "binding": "PUSH_QUEUE", "queue": "rally-push" }],
+    "consumers": [{
+      "queue": "rally-push",
+      "max_batch_size": 10,
+      "max_batch_timeout": 1,
+      "max_retries": 3,
+      "dead_letter_queue": "rally-push-dlq"
+    }]
+  },
+  "triggers": { "crons": ["*/5 * * * *", "*/15 * * * *", "0 4 * * *"] },
+
+  "vars": {
+    // THROWAWAY iOS push gate. Set to "0" (or remove with src/routes/spike.ts) after step 7.
+    "SPIKE_ENABLED": "1",
+    // Public half of the VAPID key pair (base64url, uncompressed P-256 point).
+    // The private half is the VAPID_PRIVATE_JWK secret.
+    "VAPID_PUBLIC_KEY": "BFjqbWSArvtCO6YGEvNQyMdd4quzW3kCR00vscjh4Bwpaf9e4tj3xY0ckGsHX-HiNXbxWJ54p-loMNrQFJcWCJ4",
+    "VAPID_SUBJECT": "https://rally.odd-morning-25e5.workers.dev"
+  }
+}
